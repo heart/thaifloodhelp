@@ -23,6 +23,9 @@ import {
   Loader2,
   ChevronDown,
   ChevronRight,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -68,6 +71,26 @@ const Dashboard = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [forceDeepSearch, setForceDeepSearch] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('desc');
+    }
+  };
+
+  const sortedReports = [...filteredReports].sort((a, b) => {
+    if (!sortColumn) return 0;
+
+    const aVal = a[sortColumn as keyof Report] as number || 0;
+    const bVal = b[sortColumn as keyof Report] as number || 0;
+
+    return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+  });
 
   useEffect(() => {
     fetchReports();
@@ -389,20 +412,80 @@ const Dashboard = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-12"></TableHead>
-                      <TableHead>ความเร่งด่วน</TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('urgency_level')}
+                      >
+                        <div className="flex items-center gap-1">
+                          ความเร่งด่วน
+                          {sortColumn === 'urgency_level' ? (
+                            sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                          ) : <ArrowUpDown className="h-4 w-4 opacity-30" />}
+                        </div>
+                      </TableHead>
                       <TableHead>ชื่อ-นามสกุล</TableHead>
                       <TableHead>ที่อยู่</TableHead>
                       <TableHead>เบอร์โทร</TableHead>
-                      <TableHead className="text-center">ผู้ใหญ่</TableHead>
-                      <TableHead className="text-center">เด็ก</TableHead>
-                      <TableHead className="text-center">ทารก</TableHead>
-                      <TableHead className="text-center">ผู้สูงอายุ</TableHead>
-                      <TableHead className="text-center">ผู้ป่วย</TableHead>
+                      <TableHead
+                        className="text-center cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('number_of_adults')}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          ผู้ใหญ่
+                          {sortColumn === 'number_of_adults' ? (
+                            sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                          ) : <ArrowUpDown className="h-4 w-4 opacity-30" />}
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="text-center cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('number_of_children')}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          เด็ก
+                          {sortColumn === 'number_of_children' ? (
+                            sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                          ) : <ArrowUpDown className="h-4 w-4 opacity-30" />}
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="text-center cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('number_of_infants')}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          ทารก
+                          {sortColumn === 'number_of_infants' ? (
+                            sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                          ) : <ArrowUpDown className="h-4 w-4 opacity-30" />}
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="text-center cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('number_of_seniors')}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          ผู้สูงอายุ
+                          {sortColumn === 'number_of_seniors' ? (
+                            sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                          ) : <ArrowUpDown className="h-4 w-4 opacity-30" />}
+                        </div>
+                      </TableHead>
+                      <TableHead
+                        className="text-center cursor-pointer hover:bg-muted/50 select-none"
+                        onClick={() => handleSort('number_of_patients')}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          ผู้ป่วย
+                          {sortColumn === 'number_of_patients' ? (
+                            sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                          ) : <ArrowUpDown className="h-4 w-4 opacity-30" />}
+                        </div>
+                      </TableHead>
                       <TableHead>ความช่วยเหลือ</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredReports.map((report) => {
+                    {sortedReports.map((report) => {
                       const isExpanded = expandedRows.has(report.id);
                       return (
                         <>
