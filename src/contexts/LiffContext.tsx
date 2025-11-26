@@ -25,10 +25,7 @@ const LiffContext = createContext<LiffContextType | undefined>(undefined);
 
 const LIFF_ID = import.meta.env.VITE_LIFF_ID || '';
 
-function mobileCheck(): boolean {
-  const userAgent = navigator.userAgent || '';
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-}
+
 
 export function LiffProvider({ children }: { children: ReactNode }) {
   const [isLiffInitialized, setIsLiffInitialized] = useState(false);
@@ -59,16 +56,12 @@ export function LiffProvider({ children }: { children: ReactNode }) {
           }
         } else {
           setIsInLiffClient(false);
-          if (mobileCheck()) {
-            window.location.replace(`line://app/${LIFF_ID}`);
-            setTimeout(() => { window.close(); }, 5000);
-          } else {
-            await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
-            setIsLiffInitialized(true);
-            if (liff.isLoggedIn()) {
-              setIsLoggedIn(true);
-              await fetchProfile();
-            }
+          // Always init for external browsers (mobile or desktop) without auto-login
+          await liff.init({ liffId: LIFF_ID });
+          setIsLiffInitialized(true);
+          if (liff.isLoggedIn()) {
+            setIsLoggedIn(true);
+            await fetchProfile();
           }
         }
       } catch (err) {
