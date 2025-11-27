@@ -212,6 +212,7 @@ const Review = () => {
       // Generate embedding for the report (reuse cached if available)
       const embedding =
         existingEmbedding || (await getEmbedding(formData.raw_message))
+      const embeddingString = embedding ? JSON.stringify(embedding) : null
 
       const dataToSave = {
         ...formData,
@@ -224,7 +225,7 @@ const Review = () => {
         location_long: finalLng,
         map_link: finalMapLink,
         last_contact_at: validLastContact,
-        embedding: embedding || null,
+        embedding: embeddingString,
         number_of_patients: formData.number_of_patients || 0,
         number_of_infants: formData.number_of_infants || 0,
         help_categories: formData.help_categories || [],
