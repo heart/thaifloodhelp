@@ -55,20 +55,6 @@ const Navbar = () => {
 
   const navItems = [
     {
-      path: '/extraction',
-      label: 'ช่วยใส่ข้อมูล',
-      icon: Home,
-      description: 'ช่วยใส่ข้อมูลจาก social',
-      isPrimary: true,
-    },
-    {
-      path: '/dashboard',
-      label: 'ข้อมูลผู้ต้องการความช่วยเหลือ',
-      shortLabel: 'ข้อมูล',
-      icon: Database,
-      description: 'ดูข้อมูลทั้งหมด',
-    },
-    {
       path: '/stats',
       label: 'Dashboard',
       icon: BarChart3,
