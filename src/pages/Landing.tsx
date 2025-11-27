@@ -71,31 +71,34 @@ const Landing = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section with Background Image */}
-      <section className="relative overflow-hidden py-12 md:py-16 px-4 min-h-[calc(100vh-4rem)] flex items-center bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroFlood})` }}
-      >
-        {/* Black overlay with 50% opacity */}
-        <div className="absolute inset-0 bg-black/50 -z-10" />
+      <section className="relative overflow-hidden py-12 md:py-16 px-4 min-h-[calc(100vh-4rem)] flex items-center">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${heroFlood})` }}
+        />
+        {/* Dark gradient overlay for better text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
 
         <motion.div className="max-w-6xl mx-auto text-center relative z-10 w-full" initial="hidden" animate="visible" variants={containerVariants}>
-          <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 md:mb-4 leading-tight px-4">
+          <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 md:mb-4 leading-tight px-4 drop-shadow-lg [text-shadow:_0_2px_10px_rgb(0_0_0_/_40%)]">
             Thai Flood Help
           </motion.h1>
 
-          <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg text-white/95 mb-2 md:mb-3 font-medium px-4 max-w-4xl mx-auto">
+          <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg text-white mb-2 md:mb-3 font-medium px-4 max-w-4xl mx-auto drop-shadow-md [text-shadow:_0_1px_8px_rgb(0_0_0_/_50%)]">
             เว็บไซต์ที่ช่วยรวบรวมข้อมูลที่กระจัดกระจายตามช่องทางต่างๆ
             <br />
             โดยให้ AI สกัดออกมาเป็นประเด็นสำคัญ
             เพื่อให้การช่วยเหลือได้รวดเร็วขึ้น
           </motion.p>
 
-          <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg text-white/80 mb-4 md:mb-6 px-4">
+          <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg text-white/90 mb-4 md:mb-6 px-4 drop-shadow-md [text-shadow:_0_1px_6px_rgb(0_0_0_/_50%)]">
             ทุกวินาที • มีคนรอความช่วยเหลือ
           </motion.p>
 
           <motion.p
             variants={itemVariants}
-            className="text-sm sm:text-base md:text-lg text-white/80 mb-4 md:mb-6 px-4"
+            className="text-sm sm:text-base md:text-lg text-white/90 mb-4 md:mb-6 px-4 drop-shadow-md [text-shadow:_0_1px_6px_rgb(0_0_0_/_50%)]"
           >
             หาดใหญ่ ปริมาณน้ำฝนรายชั่วโมง {getHatyaiRainfall()} มม.
           </motion.p>
