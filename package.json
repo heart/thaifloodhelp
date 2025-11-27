@@ -1,8 +1,23 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "thaifloodhelp",
+  "version": "1.0.0",
+  "description": "A full-stack tool for Thai relief teams to turn social posts into structured rescue cases—fast, mobile-friendly, and ready for field use",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "homepage": "https://thaifloodhelp.com/",
+  "license": "MIT",
+  "keywords": [
+    "flood",
+    "disaster-relief",
+    "thai",
+    "rescue",
+    "victim-management",
+    "ai-extraction",
+    "supabase",
+    "gemini",
+    "react",
+    "typescript"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -43,6 +58,7 @@
     "@react-leaflet/core": "^2.1.0",
     "@supabase/supabase-js": "^2.84.0",
     "@tanstack/react-query": "^5.83.0",
+    "@tanstack/react-query-devtools": "^5.91.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

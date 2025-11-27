@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 
 import { Toaster as Sonner } from '@/components/ui/sonner'
@@ -22,7 +23,22 @@ import Review from './pages/Review'
 import SelectReports from './pages/SelectReports'
 import Stats from './pages/Stats'
 
-const queryClient = new QueryClient()
+// Configure QueryClient with optimized defaults
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30 * 1000, // 30 seconds - data is fresh for 30s
+      gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
+      refetchOnWindowFocus: true, // Refetch when window regains focus
+      refetchOnReconnect: true, // Refetch when network reconnects
+      retry: 1,
+      retryDelay: 1000,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+})
 
 const AppContent = () => {
   const location = useLocation()
@@ -70,6 +86,7 @@ const App = () => (
           <AppContent />
         </BrowserRouter>
       </TooltipProvider>
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   </LiffProvider>
 )

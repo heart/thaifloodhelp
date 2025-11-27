@@ -1,19 +1,17 @@
 import '../styles/map.css'
 
-import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import BasemapControl from '@/components/BasemapControl'
 import InteractiveMap from '@/components/InteractiveMap'
 import MapControlPanel from '@/components/MapControlPanel'
+import { useReports, useReportsCount } from '@/hooks/use-reports'
 import { useToast } from '@/hooks/use-toast'
-import { supabase } from '@/integrations/supabase/client'
 import { getMapConfig } from '@/types/map'
 import { Report } from '@/types/report'
 
 const Map = () => {
-  const [filteredReports, setFilteredReports] = useState<Report[]>([])
   const [selectedUrgencyLevels, setSelectedUrgencyLevels] = useState<number[]>([
     1, 2, 3, 4, 5,
   ])
@@ -30,52 +28,11 @@ const Map = () => {
   // Get map configuration from env
   const mapConfig = getMapConfig()
 
-  // Fetch all reports
-  const {
-    data: reports,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['reports'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('reports')
-        .select(
-          `
-                    id,
-                    name,
-                    lastname,
-                    address,
-                    help_needed,
-                    phone,
-                    location_lat,
-                    location_long,
-                    urgency_level,
-                    status,
-                    created_at
-                `,
-        )
-        .not('location_lat', 'is', null)
-        .not('location_long', 'is', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      return data as Report[]
-    },
-  })
+  // Fetch all reports with optimized query
+  const { data: reports, isLoading, error } = useReports()
 
   // Fetch total count of all reports
-  const { data: totalCount } = useQuery({
-    queryKey: ['reports-count'],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from('reports')
-        .select('*', { count: 'exact', head: true })
-
-      if (error) throw error
-      return count || 0
-    },
-  })
+  const { data: totalCount } = useReportsCount()
 
   useEffect(() => {
     if (error) {
@@ -87,11 +44,10 @@ const Map = () => {
     }
   }, [error, toast])
 
-  // Filter reports based on selected criteria
-  useEffect(() => {
+  // Filter reports based on selected criteria - using useMemo for performance
+  const filteredReports = useMemo(() => {
     if (!reports) {
-      setFilteredReports([])
-      return
+      return []
     }
 
     let filtered = reports.filter(
@@ -111,7 +67,7 @@ const Map = () => {
       )
     }
 
-    setFilteredReports(filtered)
+    return filtered
   }, [reports, selectedUrgencyLevels, selectedStatuses, searchQuery])
 
   const toggleUrgencyLevel = (level: number) => {
@@ -136,32 +92,45 @@ const Map = () => {
     setSearchQuery('')
   }
 
-  // Count all reports (not filtered)
-  const allReportsWithLocation =
-    reports?.filter(
-      (r) => r.location_lat !== null && r.location_long !== null,
-    ) || []
+  // Count all reports (not filtered) - using useMemo for performance
+  const allReportsWithLocation = useMemo(
+    () =>
+      reports?.filter(
+        (r) => r.location_lat !== null && r.location_long !== null,
+      ) || [],
+    [reports],
+  )
 
-  const urgencyCounts = {
-    1: allReportsWithLocation.filter((r) => r.urgency_level === 1).length,
-    2: allReportsWithLocation.filter((r) => r.urgency_level === 2).length,
-    3: allReportsWithLocation.filter((r) => r.urgency_level === 3).length,
-    4: allReportsWithLocation.filter((r) => r.urgency_level === 4).length,
-    5: allReportsWithLocation.filter((r) => r.urgency_level === 5).length,
-  }
+  const urgencyCounts = useMemo(
+    () => ({
+      1: allReportsWithLocation.filter((r) => r.urgency_level === 1).length,
+      2: allReportsWithLocation.filter((r) => r.urgency_level === 2).length,
+      3: allReportsWithLocation.filter((r) => r.urgency_level === 3).length,
+      4: allReportsWithLocation.filter((r) => r.urgency_level === 4).length,
+      5: allReportsWithLocation.filter((r) => r.urgency_level === 5).length,
+    }),
+    [allReportsWithLocation],
+  )
 
-  const statusCounts = {
-    pending: allReportsWithLocation.filter((r) => r.status === 'pending')
-      .length,
-    processed: allReportsWithLocation.filter((r) => r.status === 'processed')
-      .length,
-    completed: allReportsWithLocation.filter((r) => r.status === 'completed')
-      .length,
-  }
+  const statusCounts = useMemo(
+    () => ({
+      pending: allReportsWithLocation.filter((r) => r.status === 'pending')
+        .length,
+      processed: allReportsWithLocation.filter((r) => r.status === 'processed')
+        .length,
+      completed: allReportsWithLocation.filter((r) => r.status === 'completed')
+        .length,
+    }),
+    [allReportsWithLocation],
+  )
 
-  const visibleCount = filteredReports.filter(
-    (r) => r.location_lat !== null && r.location_long !== null,
-  ).length
+  const visibleCount = useMemo(
+    () =>
+      filteredReports.filter(
+        (r) => r.location_lat !== null && r.location_long !== null,
+      ).length,
+    [filteredReports],
+  )
 
   if (isLoading) {
     return (

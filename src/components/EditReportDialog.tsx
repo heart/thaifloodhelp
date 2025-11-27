@@ -15,8 +15,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { supabase } from '@/integrations/supabase/client'
 import { formatPhoneNumber } from '@/lib/utils'
+import { useUpdateReport } from '@/hooks/use-reports'
 import type { Report } from '@/types/report'
 
 import {
@@ -42,7 +42,7 @@ export function EditReportDialog({
 }: EditReportDialogProps) {
   const [formData, setFormData] = useState<Report>(report)
   const [phoneInput, setPhoneInput] = useState(report.phone?.join(', ') || '')
-  const [isSaving, setIsSaving] = useState(false)
+  const updateReport = useUpdateReport()
 
   // Update form data when report prop changes
   useEffect(() => {
@@ -51,8 +51,6 @@ export function EditReportDialog({
   }, [report])
 
   const handleSave = async () => {
-    setIsSaving(true)
-
     try {
       // Parse and format phone numbers
       const phones = phoneInput
@@ -90,14 +88,10 @@ export function EditReportDialog({
         status: formData.status,
       }
 
-      const { error } = await supabase
-        .from('reports')
-        .update(dataToUpdate)
-        .eq('id', report.id)
-
-      if (error) {
-        throw error
-      }
+      await updateReport.mutateAsync({
+        id: report.id,
+        data: dataToUpdate,
+      })
 
       toast.success('แก้ไขข้อมูลสำเร็จ', {
         description: 'ข้อมูลได้รับการอัปเดตแล้ว',
@@ -111,8 +105,6 @@ export function EditReportDialog({
         description:
           err instanceof Error ? err.message : 'กรุณาลองใหม่อีกครั้ง',
       })
-    } finally {
-      setIsSaving(false)
     }
   }
 
@@ -518,12 +510,12 @@ export function EditReportDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={isSaving}
+            disabled={updateReport.isPending}
           >
             ยกเลิก
           </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? (
+          <Button onClick={handleSave} disabled={updateReport.isPending}>
+            {updateReport.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 กำลังบันทึก...

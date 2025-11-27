@@ -1,50 +1,15 @@
 import { motion } from 'framer-motion'
 import { MessageSquarePlus, Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import heroFlood from '@/assets/hero-flood.jpg'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/integrations/supabase/client'
+import { useLandingStats } from '@/hooks/use-stats'
 
 const Landing = () => {
   const navigate = useNavigate()
-  const [stats, setStats] = useState({
-    totalReports: 0,
-    helpedCount: 0,
-    urgentCount: 0,
-  })
-
-  useEffect(() => {
-    loadStats()
-  }, [])
-
-  const loadStats = async () => {
-    try {
-      // Run queries in parallel for better performance
-      const [totalResult, helpedResult, urgentResult] = await Promise.all([
-        supabase.from('reports').select('*', { count: 'exact', head: true }),
-        supabase
-          .from('reports')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'completed'),
-        supabase
-          .from('reports')
-          .select('*', { count: 'exact', head: true })
-          .gte('urgency_level', 4),
-      ])
-
-      setStats({
-        totalReports: totalResult.count || 0,
-        helpedCount: helpedResult.count || 0,
-        urgentCount: urgentResult.count || 0,
-      })
-    } catch (error) {
-      console.error('Error loading stats:', error)
-      // Keep current stats or show 0 - don't crash the page
-      setStats({ totalReports: 0, helpedCount: 0, urgentCount: 0 })
-    }
-  }
+  const { data: stats = { totalReports: 0, helpedCount: 0, urgentCount: 0 } } =
+    useLandingStats()
 
   const containerVariants = {
     hidden: { opacity: 0 },
